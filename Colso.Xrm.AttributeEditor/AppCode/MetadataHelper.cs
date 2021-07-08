@@ -1,10 +1,8 @@
-﻿using Microsoft.Xrm.Sdk;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 
 namespace Colso.Xrm.AttributeEditor.AppCode
 {
@@ -33,61 +31,34 @@ namespace Colso.Xrm.AttributeEditor.AppCode
         //    string rAttributeName = attributeName;
         //    string rEntityName = string.Empty;
 
-        //    if (attributeName.Contains("."))
-        //    {
-        //        string[] data = attributeName.ToLower().Split('.');
+        // if (attributeName.Contains(".")) { string[] data = attributeName.ToLower().Split('.');
 
-        //        if (!string.IsNullOrEmpty(fetchXml))
-        //        {
-        //            XmlDocument fetchDoc = new XmlDocument();
-        //            fetchDoc.LoadXml(fetchXml);
+        // if (!string.IsNullOrEmpty(fetchXml)) { XmlDocument fetchDoc = new XmlDocument(); fetchDoc.LoadXml(fetchXml);
 
-        //            XmlNode aliasNode = fetchDoc.SelectSingleNode("//link-entity[@alias='" + data[0] + "']");
-        //            if (aliasNode != null)
-        //            {
-        //                data[0] = string.Format("{0}{1}{2}{3}",
-        //                                        emd.LogicalName,
-        //                                        aliasNode.Attributes["to"].Value,
-        //                                        aliasNode.Attributes["name"].Value,
-        //                                        aliasNode.Attributes["from"].Value);
-        //            }
-        //        }
+        // XmlNode aliasNode = fetchDoc.SelectSingleNode("//link-entity[@alias='" + data[0] + "']");
+        // if (aliasNode != null) { data[0] = string.Format("{0}{1}{2}{3}", emd.LogicalName,
+        // aliasNode.Attributes["to"].Value, aliasNode.Attributes["name"].Value,
+        // aliasNode.Attributes["from"].Value); } }
 
-        //        foreach (OneToManyRelationshipMetadata otmmd in emd.ManyToOneRelationships)
-        //        {
-        //            string referencing = otmmd.ReferencingEntity;
-        //            string attrreferencing = otmmd.ReferencingAttribute;
-        //            string referenced = otmmd.ReferencedEntity;
-        //            string attrreferenced = otmmd.ReferencedAttribute;
+        // foreach (OneToManyRelationshipMetadata otmmd in emd.ManyToOneRelationships) { string
+        // referencing = otmmd.ReferencingEntity; string attrreferencing =
+        // otmmd.ReferencingAttribute; string referenced = otmmd.ReferencedEntity; string
+        // attrreferenced = otmmd.ReferencedAttribute;
 
-        //            string name = referencing + attrreferencing + referenced + attrreferenced;
+        // string name = referencing + attrreferencing + referenced + attrreferenced;
 
-        //            if (name == data[0])
-        //            {
-        //                rAttributeName = data[1];
-        //                rEntityName = referenced;
-        //                break;
-        //            }
-        //        }
+        // if (name == data[0]) { rAttributeName = data[1]; rEntityName = referenced; break; } }
 
-        //        if (!string.IsNullOrEmpty(rEntityName) && !string.IsNullOrEmpty(rAttributeName))
-        //        {
-        //            EntityMetadata relatedEmd = RetrieveEntity(rEntityName, oService);
+        // if (!string.IsNullOrEmpty(rEntityName) && !string.IsNullOrEmpty(rAttributeName)) {
+        // EntityMetadata relatedEmd = RetrieveEntity(rEntityName, oService);
 
-        //            AttributeMetadata relatedamd = (from attr in relatedEmd.Attributes
-        //                                            where attr.LogicalName == rAttributeName
-        //                                            select attr).First<AttributeMetadata>();
+        // AttributeMetadata relatedamd = (from attr in relatedEmd.Attributes where attr.LogicalName
+        // == rAttributeName select attr).First<AttributeMetadata>();
 
-        //            return relatedamd.DisplayName.UserLocalizedLabel.Label;
-        //        }
+        // return relatedamd.DisplayName.UserLocalizedLabel.Label; }
 
-        //        return string.Empty;
-        //    }
-        //    else
-        //    {
-        //        AttributeMetadata attribute = (from attr in emd.Attributes
-        //                                       where attr.LogicalName == attributeName
-        //                                       select attr).First<AttributeMetadata>();
+        // return string.Empty; } else { AttributeMetadata attribute = (from attr in emd.Attributes
+        // where attr.LogicalName == attributeName select attr).First<AttributeMetadata>();
 
         //        return attribute.DisplayName.UserLocalizedLabel.Label;
         //    }

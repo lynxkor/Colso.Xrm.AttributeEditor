@@ -1,29 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    abstract class AttributeBase : IAttribute
+    internal abstract class AttributeBase : IAttribute
     {
-        public readonly int LanguageCode = 1033;
+        public readonly int LanguageCode = 2052;
 
+        public string Description { get; set; }
         public string DisplayName { get; set; }
         public string Entity { get; set; }
         public string LogicalName { get; set; }
-        public string SchemaName { get; set; }
-        public string Description { get; set; }
         public string Requirement { get; set; }
+        public string SchemaName { get; set; }
 
         public abstract void CreateAttribute(IOrganizationService service);
 
-        public abstract void UpdateAttribute(IOrganizationService service);
+        public void DeleteAttribute(IOrganizationService service)
+        {
+            var request = new DeleteAttributeRequest
+            {
+                EntityLogicalName = Entity,
+                LogicalName = LogicalName
+            };
+
+            service.Execute(request);
+        }
 
         public void LoadFromAttributeMetadata(AttributeMetadata attribute)
         {
@@ -35,8 +41,6 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 
             LoadAdditionalAttributeMetadata(attribute);
         }
-
-        protected virtual void LoadAdditionalAttributeMetadata(AttributeMetadata attribute) { }
 
         public void LoadFromAttributeMetadataRow(AttributeMetadataRow row)
         {
@@ -91,15 +95,10 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             return result;
         }
 
-        public void DeleteAttribute(IOrganizationService service)
-        {
-            var request = new DeleteAttributeRequest
-            {
-                EntityLogicalName = Entity,
-                LogicalName = LogicalName
-            };
+        public abstract void UpdateAttribute(IOrganizationService service);
 
-            service.Execute(request);
+        protected virtual void LoadAdditionalAttributeMetadata(AttributeMetadata attribute)
+        {
         }
 
         protected AttributeRequiredLevelManagedProperty ParseRequiredLevel(string level)

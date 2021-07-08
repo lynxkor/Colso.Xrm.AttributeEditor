@@ -4,7 +4,7 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class LookupAttribute : AttributeMetadataBase<LookupAttributeMetadata>
+    internal class LookupAttribute : AttributeMetadataBase<LookupAttributeMetadata>
     {
         public string LookupTarget { get; set; }
 
@@ -42,6 +42,11 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             LookupTarget = LookupTarget;
         }
 
+        protected override void LoadAdditionalAttributeMetadata(LookupAttributeMetadata attribute)
+        {
+            LookupTarget = attribute.Targets[0];
+        }
+
         private OneToManyRelationshipMetadata GetRelationshipMetadata()
         {
             var prefix = LogicalName.Split('_')[0];
@@ -68,11 +73,6 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
                     Unshare = CascadeType.NoCascade
                 }
             };
-        }
-
-        protected override void LoadAdditionalAttributeMetadata(LookupAttributeMetadata attribute)
-        {
-            LookupTarget = attribute.Targets[0];
         }
     }
 }

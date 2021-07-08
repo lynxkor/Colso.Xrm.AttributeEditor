@@ -2,12 +2,12 @@
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class IntegerAttribute : AttributeMetadataBase<IntegerAttributeMetadata>
+    internal class IntegerAttribute : AttributeMetadataBase<IntegerAttributeMetadata>
     {
         protected override void AddAdditionalMetadata(IntegerAttributeMetadata attribute)
         {
             attribute.Format = IntegerFormat.None;
-            attribute.MaxValue = 100;
+            attribute.MaxValue = 9999;
             attribute.MinValue = 0;
         }
     }

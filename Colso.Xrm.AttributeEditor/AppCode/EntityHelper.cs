@@ -1,17 +1,17 @@
-﻿using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using Colso.Xrm.AttributeEditor.AppCode.AttributeTypes;
+using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk;
 
 namespace Colso.Xrm.AttributeEditor.AppCode
 {
     public class EntityHelper
-    { 
-        private string entity;
-        public readonly int languageCode = 1033;
+    {
+        public readonly int languageCode = 2052;
         private readonly IOrganizationService service;
+        private string entity;
 
         public EntityHelper(string entitylogicalname, int languageCode, IOrganizationService service)
         {
@@ -24,9 +24,9 @@ namespace Colso.Xrm.AttributeEditor.AppCode
         {
             var attributeType =
             (from t in Assembly.GetExecutingAssembly().GetTypes()
-                where t.GetInterfaces().Contains(typeof(IAttribute))
-                      && t.Name.Equals(type + "Attribute", StringComparison.OrdinalIgnoreCase)
-                select t).FirstOrDefault();
+             where t.GetInterfaces().Contains(typeof(IAttribute))
+                   && t.Name.Equals(type + "Attribute", StringComparison.OrdinalIgnoreCase)
+             select t).FirstOrDefault();
 
             if (attributeType == null)
                 return null;

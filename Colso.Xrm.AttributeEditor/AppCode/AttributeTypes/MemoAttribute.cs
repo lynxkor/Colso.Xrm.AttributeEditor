@@ -1,10 +1,8 @@
-﻿using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
+﻿using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class MemoAttribute : AttributeMetadataBase<MemoAttributeMetadata>
+    internal class MemoAttribute : AttributeMetadataBase<MemoAttributeMetadata>
     {
         public int? MaxLength { get; set; }
 

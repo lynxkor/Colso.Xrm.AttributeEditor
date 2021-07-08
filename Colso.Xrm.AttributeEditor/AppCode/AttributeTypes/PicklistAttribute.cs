@@ -5,11 +5,10 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class PicklistAttribute : AttributeMetadataBase<PicklistAttributeMetadata>
+    internal class PicklistAttribute : AttributeMetadataBase<PicklistAttributeMetadata>
     {
-        public string Options { get; set; }
-
         public string GlobalOptionsetName { get; set; }
+        public string Options { get; set; }
 
         protected override void AddAdditionalMetadata(PicklistAttributeMetadata attribute)
         {
@@ -36,8 +35,8 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             if (attribute.OptionSet.IsGlobal == true)
             {
                 GlobalOptionsetName = string.Concat(attribute.OptionSet.Name, ":", attribute.OptionSet.DisplayName.UserLocalizedLabel?.Label);
-
-            } else
+            }
+            else
             {
                 var options = attribute.OptionSet.Options.Select(x => $"{x.Value}:{x.Label?.UserLocalizedLabel?.Label}");
                 Options = string.Join("\n", options);

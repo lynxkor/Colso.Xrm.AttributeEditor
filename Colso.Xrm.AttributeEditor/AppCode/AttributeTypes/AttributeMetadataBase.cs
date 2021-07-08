@@ -4,7 +4,7 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    abstract class AttributeMetadataBase<T> : AttributeBase where T : AttributeMetadata, new()
+    internal abstract class AttributeMetadataBase<T> : AttributeBase where T : AttributeMetadata, new()
     {
         public override void CreateAttribute(IOrganizationService service)
         {
@@ -32,6 +32,8 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             service.Execute(request);
         }
 
+        protected abstract void AddAdditionalMetadata(T attribute);
+
         protected T GetAttributeMetadata()
         {
             var attribute = new T
@@ -45,7 +47,6 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             if (!string.IsNullOrEmpty(DisplayName)) attribute.DisplayName = new Label(DisplayName, LanguageCode);
             if (!string.IsNullOrEmpty(Description)) attribute.Description = new Label(Description, LanguageCode);
 
-
             AddAdditionalMetadata(attribute);
 
             return attribute;
@@ -56,8 +57,8 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             LoadAdditionalAttributeMetadata((T)attribute);
         }
 
-        protected virtual void LoadAdditionalAttributeMetadata(T attribute) { }
-
-        protected abstract void AddAdditionalMetadata(T attribute);
+        protected virtual void LoadAdditionalAttributeMetadata(T attribute)
+        {
+        }
     }
 }

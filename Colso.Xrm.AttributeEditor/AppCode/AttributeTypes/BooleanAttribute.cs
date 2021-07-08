@@ -4,7 +4,7 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class BooleanAttribute : AttributeMetadataBase<BooleanAttributeMetadata>
+    internal class BooleanAttribute : AttributeMetadataBase<BooleanAttributeMetadata>
     {
         public override void CreateAttribute(IOrganizationService service)
         {

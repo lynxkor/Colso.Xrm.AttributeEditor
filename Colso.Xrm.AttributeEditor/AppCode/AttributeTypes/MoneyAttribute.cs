@@ -2,16 +2,16 @@
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class MoneyAttribute : AttributeMetadataBase<MoneyAttributeMetadata>
+    internal class MoneyAttribute : AttributeMetadataBase<MoneyAttributeMetadata>
     {
         public string Precision { get; set; }
 
         protected override void AddAdditionalMetadata(MoneyAttributeMetadata attribute)
         {
-            attribute.MaxValue = 1000.00;
+            attribute.MaxValue = 1000000.00;
             attribute.MinValue = 0.00;
             if (!string.IsNullOrEmpty(Precision)) attribute.Precision = int.Parse(Precision);
-            attribute.PrecisionSource = 1;
+            attribute.PrecisionSource = 2;
             attribute.ImeMode = ImeMode.Disabled;
         }
     }

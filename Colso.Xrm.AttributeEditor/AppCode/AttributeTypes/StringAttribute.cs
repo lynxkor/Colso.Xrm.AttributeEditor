@@ -2,7 +2,7 @@
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class StringAttribute : AttributeMetadataBase<StringAttributeMetadata>
+    internal class StringAttribute : AttributeMetadataBase<StringAttributeMetadata>
     {
         public int? MaxLength { get; set; }
 

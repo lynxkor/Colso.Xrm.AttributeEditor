@@ -1,12 +1,6 @@
-﻿using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Metadata;
-using Microsoft.Xrm.Sdk.Query;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System;
 using System.Linq;
-using System.Xml.Linq;
+using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode
 {
@@ -14,15 +8,30 @@ namespace Colso.Xrm.AttributeEditor.AppCode
     {
         private readonly EntityMetadata record;
 
+        public EntityItem(EntityMetadata record)
+        {
+            this.record = record;
+        }
+
         public string DisplayName
         {
             get
             {
-                return record.DisplayName == null ? 
-                    string.Empty : 
-                    record.DisplayName.UserLocalizedLabel == null ? 
-                    record.DisplayName.LocalizedLabels.Select(l => l.Label).FirstOrDefault() : 
+                return record.DisplayName == null ?
+                    string.Empty :
+                    record.DisplayName.UserLocalizedLabel == null ?
+                    record.DisplayName.LocalizedLabels.Select(l => l.Label).FirstOrDefault() :
                     record.DisplayName.UserLocalizedLabel.Label;
+            }
+        }
+
+        public int LanguageCode
+        {
+            get
+            {
+                return record.DisplayName == null || record.DisplayName.UserLocalizedLabel == null ?
+                    2052 :
+                    record.DisplayName.UserLocalizedLabel.LanguageCode;
             }
         }
 
@@ -32,28 +41,6 @@ namespace Colso.Xrm.AttributeEditor.AppCode
             {
                 return record.LogicalName;
             }
-        }
-        public int LanguageCode
-        {
-            get
-            {
-                return record.DisplayName == null || record.DisplayName.UserLocalizedLabel  == null ?
-                    1033 :
-                    record.DisplayName.UserLocalizedLabel.LanguageCode;
-            }
-        }
-
-        public EntityItem(EntityMetadata record)
-        {
-            this.record = record;
-        }
-
-        public bool Equals(EntityItem other)
-        {
-            if (record == null) return false;
-            if (other == null) return false;
-
-            return record.LogicalName.Equals(other.LogicalName);
         }
 
         public int CompareTo(EntityItem other)
@@ -65,8 +52,15 @@ namespace Colso.Xrm.AttributeEditor.AppCode
             if (record == null)
                 return -1;
 
-            
             return this.DisplayName.CompareTo(other.DisplayName);
+        }
+
+        public bool Equals(EntityItem other)
+        {
+            if (record == null) return false;
+            if (other == null) return false;
+
+            return record.LogicalName.Equals(other.LogicalName);
         }
     }
 }

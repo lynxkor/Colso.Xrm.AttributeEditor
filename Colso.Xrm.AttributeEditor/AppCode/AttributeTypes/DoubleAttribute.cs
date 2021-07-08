@@ -2,13 +2,13 @@
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class DoubleAttribute : AttributeMetadataBase<DoubleAttributeMetadata>
+    internal class DoubleAttribute : AttributeMetadataBase<DoubleAttributeMetadata>
     {
         protected override void AddAdditionalMetadata(DoubleAttributeMetadata attribute)
         {
-            attribute.MaxValue = 100;
+            attribute.MaxValue = 1000000;
             attribute.MinValue = 0;
-            attribute.Precision = 1;
+            attribute.Precision = 2;
         }
     }
 }

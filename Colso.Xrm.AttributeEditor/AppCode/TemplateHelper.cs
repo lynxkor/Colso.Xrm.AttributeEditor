@@ -1,26 +1,38 @@
-﻿using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Xrm.Sdk.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
+﻿using System.Data;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Colso.Xrm.AttributeEditor.AppCode
 {
     public static class TemplateHelper
     {
-
-        public static void InitDocument(SpreadsheetDocument document, out WorkbookPart workbookPart, out Sheets sheets)
+        public static object ConvertToRawValue(this ColumnAttribute column, string stringvalue)
         {
-            workbookPart = document.AddWorkbookPart();
-            workbookPart.Workbook = new Workbook();
+            if (!string.IsNullOrEmpty(stringvalue))
+            {
+                switch (column.Type)
+                {
+                    case CellValues.Number:
+                        return int.Parse(stringvalue);
 
-            sheets = workbookPart.Workbook.AppendChild(new Sheets());
+                    default:
+                        return stringvalue;
+                }
+            }
+
+            return null;
+        }
+
+        public static Cell CreateCell(CellValues type, string value)
+        {
+            var cell = new Cell();
+
+            cell.DataType = type;
+            cell.CellValue = new CellValue(value);
+
+            return cell;
         }
 
         public static void CreateSheet(WorkbookPart workbookPart, Sheets sheets, string name, out SheetData sheetData)
@@ -38,56 +50,8 @@ namespace Colso.Xrm.AttributeEditor.AppCode
             sheets.Append(sheet);
         }
 
-        public static Cell CreateCell(CellValues type, string value)
-        {
-            var cell = new Cell();
-
-            cell.DataType = type;
-            cell.CellValue = new CellValue(value);
-
-            return cell;
-        }
-         
-        // BC 22/01/2018: cellreference is always null -> use old method
-        //public static string GetCellValue(Row row, int index, SharedStringTable sharedString)
-        //{
-        //    var column = Utilities.IndexToColumn(index+1);
-
-        //    var cell = (Cell) row.ChildElements
-        //            .Select(x => ((Cell)x))
-        //            .Where(x => x != null && x.CellReference != null && x.CellReference.Value != null)
-        //            .Where(x => x.CellReference.Value.StartsWith(column))
-        //            .FirstOrDefault();
-
-        //    if (cell == null)
-        //        return null;
-
-        //    if (cell.DataType != null && sharedString != null
-        //        && cell.DataType.HasValue && cell.DataType == CellValues.SharedString
-        //        && int.Parse(cell.CellValue.InnerText) < sharedString.ChildElements.Count)
-        //    {
-        //        return sharedString.ChildElements[int.Parse(cell.CellValue.InnerText)].InnerText;
-        //    } 
-
         //    return cell.CellValue?.InnerText;
         //}
-
-        public static object ConvertToRawValue(this ColumnAttribute column, string stringvalue)
-        {
-            if (!string.IsNullOrEmpty(stringvalue))
-            {
-                switch (column.Type)
-                {
-                    case CellValues.Number:
-                        return int.Parse(stringvalue);
-                    default:
-                        return stringvalue;
-                }
-            }
-
-            return null;
-        }
-
         public static string GetCellValue(this Row row, int index, SharedStringTable sharedString)
         {
             if (row != null)
@@ -101,7 +65,8 @@ namespace Colso.Xrm.AttributeEditor.AppCode
                     {
                         cell = c;
                         break;
-                    } else if (cIndex > index)
+                    }
+                    else if (cIndex > index)
                     {
                         // we are past the index
                         break;
@@ -124,6 +89,30 @@ namespace Colso.Xrm.AttributeEditor.AppCode
 
             return null;
         }
+
+        public static void InitDocument(SpreadsheetDocument document, out WorkbookPart workbookPart, out Sheets sheets)
+        {
+            workbookPart = document.AddWorkbookPart();
+            workbookPart.Workbook = new Workbook();
+
+            sheets = workbookPart.Workbook.AppendChild(new Sheets());
+        }
+
+        // BC 22/01/2018: cellreference is always null -> use old method
+        //public static string GetCellValue(Row row, int index, SharedStringTable sharedString)
+        //{
+        //    var column = Utilities.IndexToColumn(index+1);
+
+        // var cell = (Cell) row.ChildElements .Select(x => ((Cell)x)) .Where(x => x != null &&
+        // x.CellReference != null && x.CellReference.Value != null) .Where(x =>
+        // x.CellReference.Value.StartsWith(column)) .FirstOrDefault();
+
+        // if (cell == null) return null;
+
+        // if (cell.DataType != null && sharedString != null && cell.DataType.HasValue &&
+        // cell.DataType == CellValues.SharedString && int.Parse(cell.CellValue.InnerText) <
+        // sharedString.ChildElements.Count) { return
+        // sharedString.ChildElements[int.Parse(cell.CellValue.InnerText)].InnerText; }
         private static int? GetColumnIndex(string cellReference)
         {
             if (string.IsNullOrEmpty(cellReference))
@@ -147,6 +136,5 @@ namespace Colso.Xrm.AttributeEditor.AppCode
 
             return columnNumber;
         }
-
     }
 }

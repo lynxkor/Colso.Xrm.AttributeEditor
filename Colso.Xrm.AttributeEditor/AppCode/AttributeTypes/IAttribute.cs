@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
@@ -12,12 +11,15 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
         string Requirement { get; set; }
 
         void CreateAttribute(IOrganizationService service);
+
         void DeleteAttribute(IOrganizationService service);
-        void UpdateAttribute(IOrganizationService service);
+
         void LoadFromAttributeMetadata(AttributeMetadata attribute);
 
-
         void LoadFromAttributeMetadataRow(AttributeMetadataRow row);
+
         AttributeMetadataRow ToAttributeMetadataRow();
+
+        void UpdateAttribute(IOrganizationService service);
     }
 }

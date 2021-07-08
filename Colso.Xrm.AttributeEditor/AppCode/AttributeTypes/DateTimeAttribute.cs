@@ -3,7 +3,7 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class DateTimeAttribute : AttributeMetadataBase<DateTimeAttributeMetadata>
+    internal class DateTimeAttribute : AttributeMetadataBase<DateTimeAttributeMetadata>
     {
         public string DateFormat { get; set; }
 

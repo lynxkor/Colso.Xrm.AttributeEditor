@@ -7,33 +7,9 @@ using Microsoft.Xrm.Sdk.Metadata.Query;
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class StatusAttribute : AttributeMetadataBase<StatusAttributeMetadata>
+    internal class StatusAttribute : AttributeMetadataBase<StatusAttributeMetadata>
     {
         public string Options { get; set; }
-
-        protected override void AddAdditionalMetadata(StatusAttributeMetadata attribute)
-        {
-            var options = ParseOptions();
-
-            var optionCollection = new OptionMetadataCollection(options.Cast<OptionMetadata>().ToList());
-
-            attribute.OptionSet = new OptionSetMetadata(optionCollection)
-            {
-                IsGlobal = false,
-                OptionSetType = OptionSetType.Status,
-            };
-        }
-
-        private List<StatusOptionMetadata> ParseOptions()
-        {
-            var options = Options.Split('\n').Select(x =>
-                    x.Split(':'))
-                .Select(x => new StatusOptionMetadata(int.Parse(x[0]), int.Parse(x[1]))
-                {
-                    Label = new Label(x[2], LanguageCode)
-                }).ToList();
-            return options;
-        }
 
         public override void UpdateAttribute(IOrganizationService service)
         {
@@ -59,6 +35,29 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
             }
 
             base.UpdateAttribute(service);
+        }
+
+        protected override void AddAdditionalMetadata(StatusAttributeMetadata attribute)
+        {
+            var options = ParseOptions();
+
+            var optionCollection = new OptionMetadataCollection(options.Cast<OptionMetadata>().ToList());
+
+            attribute.OptionSet = new OptionSetMetadata(optionCollection)
+            {
+                IsGlobal = false,
+                OptionSetType = OptionSetType.Status,
+            };
+        }
+
+        protected override void LoadAdditionalAttributeMetadata(StatusAttributeMetadata attribute)
+        {
+            var options = attribute.OptionSet.Options
+                .OrderBy(x => x.Value)
+                .Cast<StatusOptionMetadata>()
+                .Select(x => $"{x.Value}:{x.State}:{x.Label?.UserLocalizedLabel?.Label}");
+
+            Options = string.Join("\n", options);
         }
 
         private StatusAttributeMetadata GetAttributeMetadata(IOrganizationService service)
@@ -88,19 +87,20 @@ namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
                 }
             };
 
-            var response = (RetrieveMetadataChangesResponse) service.Execute(request);
+            var response = (RetrieveMetadataChangesResponse)service.Execute(request);
 
             return (StatusAttributeMetadata)response.EntityMetadata[0].Attributes.FirstOrDefault(x => x.LogicalName == LogicalName);
         }
 
-        protected override void LoadAdditionalAttributeMetadata(StatusAttributeMetadata attribute)
+        private List<StatusOptionMetadata> ParseOptions()
         {
-            var options = attribute.OptionSet.Options
-                .OrderBy(x => x.Value)
-                .Cast<StatusOptionMetadata>()
-                .Select(x => $"{x.Value}:{x.State}:{x.Label?.UserLocalizedLabel?.Label}");
-
-            Options = string.Join("\n", options);
+            var options = Options.Split('\n').Select(x =>
+                    x.Split(':'))
+                .Select(x => new StatusOptionMetadata(int.Parse(x[0]), int.Parse(x[1]))
+                {
+                    Label = new Label(x[2], LanguageCode)
+                }).ToList();
+            return options;
         }
     }
 }

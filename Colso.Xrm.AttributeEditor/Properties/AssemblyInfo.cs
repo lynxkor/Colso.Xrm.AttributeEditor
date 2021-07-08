@@ -9,9 +9,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © Colso 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-
 [assembly: ComVisible(false)]
-
 [assembly: Guid("aef1b9bd-4f00-4fed-bbba-f72cddc61de3")]
-
 [assembly: AssemblyVersion("1.2021.3.1")]

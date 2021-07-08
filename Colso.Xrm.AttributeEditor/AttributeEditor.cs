@@ -1,20 +1,18 @@
-﻿using Colso.Xrm.AttributeEditor.AppCode;
-using Colso.Xrm.AttributeEditor.Forms;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using McTools.Xrm.Connection;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Metadata;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
 using System.Windows.Forms;
+using Colso.Xrm.AttributeEditor.AppCode;
+using Colso.Xrm.AttributeEditor.Forms;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Metadata;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
 using XrmToolBox.Extensibility.Interfaces;
@@ -25,18 +23,21 @@ namespace Colso.Xrm.AttributeEditor
     {
         #region Variables
 
+        private AttributeEditorViewModel _vm;
+
+        private System.Drawing.Color ColorCreate = System.Drawing.Color.LightGreen;
+
+        private System.Drawing.Color ColorDelete = System.Drawing.Color.Salmon;
+
+        private System.Drawing.Color ColorUpdate = System.Drawing.Color.LightBlue;
+
         /// <summary>
         /// Information panel
         /// </summary>
         private Panel informationPanel;
 
-        private bool workingstate = false;
         private Dictionary<string, int> lvSortcolumns = new Dictionary<string, int>();
-
-        private System.Drawing.Color ColorCreate = System.Drawing.Color.LightGreen;
-        private System.Drawing.Color ColorUpdate = System.Drawing.Color.LightBlue;
-        private System.Drawing.Color ColorDelete = System.Drawing.Color.Salmon;
-        private AttributeEditorViewModel _vm;
+        private bool workingstate = false;
 
         #endregion Variables
 
@@ -77,9 +78,20 @@ namespace Colso.Xrm.AttributeEditor
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
 
-        public Image PluginLogo
+        public string DonationDescription
         {
-            get { return null; }
+            get
+            {
+                return "Donation for Entity Attribute Editer - XrmToolBox";
+            }
+        }
+
+        public string EmailAccount
+        {
+            get
+            {
+                return "bramcolpaert@outlook.com";
+            }
         }
 
         public string HelpUrl
@@ -88,6 +100,11 @@ namespace Colso.Xrm.AttributeEditor
             {
                 return "https://github.com/MscrmTools/Colso.Xrm.DataTransporter/wiki";
             }
+        }
+
+        public Image PluginLogo
+        {
+            get { return null; }
         }
 
         public string RepositoryName
@@ -103,22 +120,6 @@ namespace Colso.Xrm.AttributeEditor
             get
             {
                 return "MscrmTools";
-            }
-        }
-
-        public string DonationDescription
-        {
-            get
-            {
-                return "Donation for Entity Attribute Editer - XrmToolBox";
-            }
-        }
-
-        public string EmailAccount
-        {
-            get
-            {
-                return "bramcolpaert@outlook.com";
             }
         }
 
@@ -167,19 +168,23 @@ namespace Colso.Xrm.AttributeEditor
             var t = _vm.LoadEntities();
         }
 
-        private void tsbCloseThisTab_Click(object sender, EventArgs e)
+        private void btnExport_Click(object sender, EventArgs e)
         {
-            CloseTool();
+            ExportAttributes();
         }
 
-        private void tsbLoadEntities_Click(object sender, EventArgs e)
+        private void btnImport_Click(object sender, EventArgs e)
         {
-            var t = _vm.LoadEntities();
+            ImportAttributes();
         }
 
-        private void tsbPublish_Click(object sender, EventArgs e)
+        private void btnSelectTemplate_Click(object sender, EventArgs e)
         {
-            SaveChanges();
+            OpenFileDialog file = new OpenFileDialog();
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                txtTemplatePath.Text = file.FileName;
+            }
         }
 
         private void cmbEntities_SelectedIndexChanged(object sender, EventArgs e)
@@ -192,23 +197,9 @@ namespace Colso.Xrm.AttributeEditor
             SetListViewSorting(lvAttributes, e.Column);
         }
 
-        private void btnImport_Click(object sender, EventArgs e)
+        private void tsbCloseThisTab_Click(object sender, EventArgs e)
         {
-            ImportAttributes();
-        }
-
-        private void btnExport_Click(object sender, EventArgs e)
-        {
-            ExportAttributes();
-        }
-
-        private void btnSelectTemplate_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog file = new OpenFileDialog();
-            if (file.ShowDialog() == DialogResult.OK)
-            {
-                txtTemplatePath.Text = file.FileName;
-            }
+            CloseTool();
         }
 
         private void tsbDonate_Click(object sender, EventArgs e)
@@ -216,100 +207,23 @@ namespace Colso.Xrm.AttributeEditor
             OpenDonationPage("EUR");
         }
 
+        private void tsbLoadEntities_Click(object sender, EventArgs e)
+        {
+            var t = _vm.LoadEntities();
+        }
+
+        private void tsbPublish_Click(object sender, EventArgs e)
+        {
+            SaveChanges();
+        }
+
         #endregion Form events
 
         #region Methods
 
-        private void ManageWorkingState(bool working)
+        private void Entity_OnStatusMessage(object sender, EventArgs e)
         {
-            workingstate = working;
-            cmbEntities.Enabled = !working;
-            gbEntity.Enabled = !working;
-            gbAttributes.Enabled = !working;
-            Cursor = working ? Cursors.WaitCursor : Cursors.Default;
-        }
-
-        private void PopulateAttributes()
-        {
-            if (!workingstate)
-            {
-                // Reinit other controls
-                lvAttributes.Items.Clear();
-
-                // Setup Column Headings
-                lvAttributes.Columns.Clear();
-                lvAttributes.Columns.Add("Action");
-                foreach (var column in AttributeMetadataRow.GetColumns())
-                    lvAttributes.Columns.Add(column.Header, column.Width);
-
-                if (cmbEntities.SelectedItem != null)
-                {
-                    var entityitem = (EntityItem)cmbEntities.SelectedItem;
-
-                    if (!string.IsNullOrEmpty(entityitem.LogicalName))
-                    {
-                        ManageWorkingState(true);
-
-                        // Launch treatment
-                        var bwFill = new BackgroundWorker();
-                        bwFill.DoWork += (sender, e) =>
-                        {
-                            // Retrieve 
-                            var entity = MetadataHelper.RetrieveEntity(entityitem.LogicalName, this.Service);
-
-                            // Prepare list of items
-                            var itemList = new List<ListViewItem>();
-
-                            foreach (AttributeMetadata att in entity.Attributes)
-                            {
-                                if (att.IsValidForUpdate.Value && att.IsCustomizable.Value)
-                                {
-                                    var attribute = EntityHelper.GetAttributeFromTypeName(att.AttributeType.Value.ToString());
-
-                                    if (attribute == null)
-                                        continue;
-
-                                    attribute.LoadFromAttributeMetadata(att);
-
-                                    var row = attribute.ToAttributeMetadataRow();
-                                    var item = row.ToListViewItem();
-
-                                    item.Tag = att;
-                                    itemList.Add(item);
-                                }
-                            }
-
-                            UpdateInformation(entity.Attributes);
-                            e.Result = itemList;
-                        };
-                        bwFill.RunWorkerCompleted += (sender, e) =>
-                        {
-                            if (e.Error != null)
-                            {
-                                MessageBox.Show(this, "An error occured: " + e.Error.Message, "Error", MessageBoxButtons.OK,
-                                                MessageBoxIcon.Error);
-                            }
-                            else
-                            {
-                                var items = (List<ListViewItem>)e.Result;
-                                if (items.Count == 0)
-                                {
-                                    MessageBox.Show(this, "The entity does not contain any attributes", "Warning", MessageBoxButtons.OK,
-                                                    MessageBoxIcon.Warning);
-                                }
-                                else
-                                {
-                                    lvAttributes.Items.AddRange(items.ToArray());
-                                    SendMessageToStatusBar(this, new StatusBarMessageEventArgs(string.Format("{0} customizable attributes loaded", items.Count)));
-                                }
-                            }
-
-                            ManageWorkingState(false);
-                        };
-                        bwFill.RunWorkerAsync();
-                    }
-                }
-            }
+            SendMessageToStatusBar(this, new StatusBarMessageEventArgs(((StatusMessageEventArgs)e).Message));
         }
 
         private void ExportAttributes()
@@ -331,7 +245,6 @@ namespace Colso.Xrm.AttributeEditor
                 FileName = string.Format("{0}_attributeeditor.xlsx", selectedLogicalName?.LogicalName)
             };
             saveFileDlg.ShowDialog();
-
 
             // If the file name is not an empty string open it for saving.
             if (!string.IsNullOrEmpty(saveFileDlg.FileName))
@@ -365,7 +278,7 @@ namespace Colso.Xrm.AttributeEditor
 
                             sheetData.AppendChild(headerRow);
 
-                            #endregion
+                            #endregion Header
 
                             #region Data
 
@@ -387,7 +300,7 @@ namespace Colso.Xrm.AttributeEditor
                                 sheetData.AppendChild(metadataRow.ToTableRow());
                             }
 
-                            #endregion
+                            #endregion Data
 
                             workbookPart.Workbook.Save();
                         }
@@ -576,6 +489,133 @@ namespace Colso.Xrm.AttributeEditor
             bwTransferData.RunWorkerAsync(lvAttributes.Items.Cast<ListViewItem>().ToList());
         }
 
+        private bool IsChanged(ListViewItem lvItems, Row row, SharedStringTable stringTable)
+        {
+            var changed = false;
+
+            var displayName = row.GetCellValue(1, stringTable);
+            if (lvItems.SubItems[1].Text != displayName && !string.IsNullOrEmpty(displayName))
+            {
+                lvItems.SubItems[1].Text = displayName;
+                lvItems.SubItems[1].ForeColor = ColorUpdate;
+                changed = true;
+            }
+
+            for (var i = 4; i < lvItems.SubItems.Count; i++)
+            {
+                var item = lvItems.SubItems[i];
+
+                var value = row.GetCellValue(4, stringTable);
+
+                if (item.Text != value && !string.IsNullOrEmpty(value))
+                {
+                    item.Text = value;
+                    item.ForeColor = ColorUpdate;
+                    changed = true;
+                }
+            }
+
+            return changed;
+        }
+
+        private void ManageWorkingState(bool working)
+        {
+            workingstate = working;
+            cmbEntities.Enabled = !working;
+            gbEntity.Enabled = !working;
+            gbAttributes.Enabled = !working;
+            Cursor = working ? Cursors.WaitCursor : Cursors.Default;
+        }
+
+        private void OpenDonationPage(string currency)
+        {
+            var url = string.Format("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business={0}&lc=GB&item_name={1}&currency_code={2}&no_note=0&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest", EmailAccount, DonationDescription, currency);
+            System.Diagnostics.Process.Start(url);
+        }
+
+        private void PopulateAttributes()
+        {
+            if (!workingstate)
+            {
+                // Reinit other controls
+                lvAttributes.Items.Clear();
+
+                // Setup Column Headings
+                lvAttributes.Columns.Clear();
+                lvAttributes.Columns.Add("Action");
+                foreach (var column in AttributeMetadataRow.GetColumns())
+                    lvAttributes.Columns.Add(column.Header, column.Width);
+
+                if (cmbEntities.SelectedItem != null)
+                {
+                    var entityitem = (EntityItem)cmbEntities.SelectedItem;
+
+                    if (!string.IsNullOrEmpty(entityitem.LogicalName))
+                    {
+                        ManageWorkingState(true);
+
+                        // Launch treatment
+                        var bwFill = new BackgroundWorker();
+                        bwFill.DoWork += (sender, e) =>
+                        {
+                            // Retrieve
+                            var entity = MetadataHelper.RetrieveEntity(entityitem.LogicalName, this.Service);
+
+                            // Prepare list of items
+                            var itemList = new List<ListViewItem>();
+
+                            foreach (AttributeMetadata att in entity.Attributes)
+                            {
+                                if (att.IsValidForUpdate.Value && att.IsCustomizable.Value)
+                                {
+                                    var attribute = EntityHelper.GetAttributeFromTypeName(att.AttributeType.Value.ToString());
+
+                                    if (attribute == null)
+                                        continue;
+
+                                    attribute.LoadFromAttributeMetadata(att);
+
+                                    var row = attribute.ToAttributeMetadataRow();
+                                    var item = row.ToListViewItem();
+
+                                    item.Tag = att;
+                                    itemList.Add(item);
+                                }
+                            }
+
+                            UpdateInformation(entity.Attributes);
+                            e.Result = itemList;
+                        };
+                        bwFill.RunWorkerCompleted += (sender, e) =>
+                        {
+                            if (e.Error != null)
+                            {
+                                MessageBox.Show(this, "An error occured: " + e.Error.Message, "Error", MessageBoxButtons.OK,
+                                                MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                var items = (List<ListViewItem>)e.Result;
+                                if (items.Count == 0)
+                                {
+                                    MessageBox.Show(this, "The entity does not contain any attributes", "Warning", MessageBoxButtons.OK,
+                                                    MessageBoxIcon.Warning);
+                                }
+                                else
+                                {
+                                    lvAttributes.Items.AddRange(items.ToArray());
+                                    SendMessageToStatusBar(this, new StatusBarMessageEventArgs(string.Format("{0} customizable attributes loaded", items.Count)));
+                                }
+                            }
+
+                            ManageWorkingState(false);
+                        };
+                        bwFill.RunWorkerAsync();
+                    }
+                }
+            }
+        }
+
         private void SaveChanges()
         {
             if (cmbEntities.SelectedItem == null)
@@ -602,10 +642,9 @@ namespace Colso.Xrm.AttributeEditor
 
                 for (int i = 0; i < itemsToProcess.Count; i++)
                 {
-
                     // TODO: Validate each row
                     //if (item.SubItems.Count == 6)
-                    //{ 
+                    //{
                     var item = itemsToProcess[i];
                     var attributeMetadata = item.Metadata;
                     InformationPanel.ChangeInformationPanelMessage(informationPanel, string.Format("Processing attribute {0}...", attributeMetadata.LogicalName));
@@ -630,9 +669,11 @@ namespace Colso.Xrm.AttributeEditor
                             case "Create":
                                 if (cbCreate.Checked) attribute.CreateAttribute(Service);
                                 break;
+
                             case "Update":
                                 if (cbUpdate.Checked) attribute.UpdateAttribute(Service);
                                 break;
+
                             case "Delete":
                                 if (cbDelete.Checked) attribute.DeleteAttribute(Service);
                                 break;
@@ -678,27 +719,6 @@ namespace Colso.Xrm.AttributeEditor
             bwTransferData.RunWorkerAsync();
         }
 
-        private void Entity_OnStatusMessage(object sender, EventArgs e)
-        {
-            SendMessageToStatusBar(this, new StatusBarMessageEventArgs(((StatusMessageEventArgs)e).Message));
-        }
-
-        private void UpdateInformation(AttributeMetadata[] attributes)
-        {
-            var limit = 1024;
-            var attributestoprocess = attributes.Where(a => string.IsNullOrEmpty(a.AttributeOf)).ToArray();
-            var count = attributestoprocess.Length;
-            var usedspace = attributestoprocess.Sum(i => (i.AttributeType.Value.ToString() == "Lookup") ? 3 : (i.AttributeType.Value.ToString() == "Picklist" || i.AttributeType.Value.ToString() == "Boolean" || i.AttributeType.Value.ToString() == "Money") ? 2 : 1);
-            var available = limit - usedspace;
-            var available2 = Math.Floor((double)(available / 2));
-            var available3 = Math.Floor((double)(available / 3));
-            var available4 = Math.Floor((double)(available / 4));
-
-            lblCount.Text = string.Format("{0} attributes", count);
-            lblUsed.Text = string.Format("Used space: {0}/{1}", usedspace, limit);
-            lblAvailable.Text = string.Format("Available space: -Money: {0}; -Lookup: {1}; -Picklist/Boolean: {2}; -Other: {3}", available4 > 0 ? available4 : 0, available3 > 0 ? available3 : 0, available2 > 0 ? available2 : 0, available);
-        }
-
         private void SetListViewSorting(ListView listview, int column)
         {
             int currentSortcolumn = -1;
@@ -723,42 +743,22 @@ namespace Colso.Xrm.AttributeEditor
             listview.ListViewItemSorter = new ListViewItemComparer(column, listview.Sorting);
         }
 
-        private bool IsChanged(ListViewItem lvItems, Row row, SharedStringTable stringTable)
+        private void UpdateInformation(AttributeMetadata[] attributes)
         {
-            var changed = false;
+            var limit = 1024;
+            var attributestoprocess = attributes.Where(a => string.IsNullOrEmpty(a.AttributeOf)).ToArray();
+            var count = attributestoprocess.Length;
+            var usedspace = attributestoprocess.Sum(i => (i.AttributeType.Value.ToString() == "Lookup") ? 3 : (i.AttributeType.Value.ToString() == "Picklist" || i.AttributeType.Value.ToString() == "Boolean" || i.AttributeType.Value.ToString() == "Money") ? 2 : 1);
+            var available = limit - usedspace;
+            var available2 = Math.Floor((double)(available / 2));
+            var available3 = Math.Floor((double)(available / 3));
+            var available4 = Math.Floor((double)(available / 4));
 
-            var displayName = row.GetCellValue(1, stringTable);
-            if (lvItems.SubItems[1].Text != displayName && !string.IsNullOrEmpty(displayName))
-            {
-                lvItems.SubItems[1].Text = displayName;
-                lvItems.SubItems[1].ForeColor = ColorUpdate;
-                changed = true;
-            }
-
-            for (var i = 4; i < lvItems.SubItems.Count; i++)
-            {
-                var item = lvItems.SubItems[i];
-
-                var value = row.GetCellValue(4, stringTable);
-
-                if (item.Text != value && !string.IsNullOrEmpty(value))
-                {
-                    item.Text = value;
-                    item.ForeColor = ColorUpdate;
-                    changed = true;
-                }
-            }
-
-            return changed;
-        }
-
-        private void OpenDonationPage(string currency)
-        {
-            var url = string.Format("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business={0}&lc=GB&item_name={1}&currency_code={2}&no_note=0&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest", EmailAccount, DonationDescription, currency);
-            System.Diagnostics.Process.Start(url);
+            lblCount.Text = string.Format("{0} attributes", count);
+            lblUsed.Text = string.Format("Used space: {0}/{1}", usedspace, limit);
+            lblAvailable.Text = string.Format("Available space: -Money: {0}; -Lookup: {1}; -Picklist/Boolean: {2}; -Other: {3}", available4 > 0 ? available4 : 0, available3 > 0 ? available3 : 0, available2 > 0 ? available2 : 0, available);
         }
 
         #endregion Methods
-
     }
 }

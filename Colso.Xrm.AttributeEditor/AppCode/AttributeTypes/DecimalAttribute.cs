@@ -2,13 +2,13 @@
 
 namespace Colso.Xrm.AttributeEditor.AppCode.AttributeTypes
 {
-    class DecimalAttribute : AttributeMetadataBase<DecimalAttributeMetadata>
+    internal class DecimalAttribute : AttributeMetadataBase<DecimalAttributeMetadata>
     {
         protected override void AddAdditionalMetadata(DecimalAttributeMetadata attribute)
         {
-            attribute.MaxValue = 100;
+            attribute.MaxValue = 1000000;
             attribute.MinValue = 0;
-            attribute.Precision = 1;
+            attribute.Precision = 2;
         }
     }
 }

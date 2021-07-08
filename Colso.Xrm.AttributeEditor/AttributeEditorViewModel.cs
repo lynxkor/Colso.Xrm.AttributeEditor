@@ -5,22 +5,13 @@ using System.Windows.Forms;
 using Colso.Xrm.AttributeEditor.AppCode;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
-using XrmToolBox.Extensibility;
 
 namespace Colso.Xrm.AttributeEditor
 {
     public class AttributeEditorViewModel
     {
-        private readonly IMetadataHelper _metadataHelper;
-        public IOrganizationService Service { get; set; }
-        public List<EntityItem> Entities { get; set; }
         public bool WorkingState;
-
-        public event EventHandler OnRequestConnection;
-        public event EventHandler OnEntitiesListChanged;
-        public event EventHandler OnWorkingStateChanged;
-        public event EventHandler<GetInformationPanelEventArgs> OnGetInformationPanel;
-        public event EventHandler<MessageBoxEventArgs> OnShowMessageBox;
+        private readonly IMetadataHelper _metadataHelper;
 
         public AttributeEditorViewModel(IMetadataHelper metadataHelper)
         {
@@ -28,6 +19,19 @@ namespace Colso.Xrm.AttributeEditor
 
             Entities = new List<EntityItem>();
         }
+
+        public event EventHandler OnEntitiesListChanged;
+
+        public event EventHandler<GetInformationPanelEventArgs> OnGetInformationPanel;
+
+        public event EventHandler OnRequestConnection;
+
+        public event EventHandler<MessageBoxEventArgs> OnShowMessageBox;
+
+        public event EventHandler OnWorkingStateChanged;
+
+        public List<EntityItem> Entities { get; set; }
+        public IOrganizationService Service { get; set; }
 
         public async Task LoadEntities()
         {
@@ -94,15 +98,17 @@ namespace Colso.Xrm.AttributeEditor
 
         public class GetInformationPanelEventArgs : EventArgs
         {
-            public string Message { get; set; }
-            public int Width { get; set; }
             public int Height { get; set; }
+            public string Message { get; set; }
             public IDisposable Panel { get; set; }
+            public int Width { get; set; }
         }
 
         public class MessageBoxEventArgs : EventArgs
         {
-            public MessageBoxEventArgs() { }
+            public MessageBoxEventArgs()
+            {
+            }
 
             public MessageBoxEventArgs(string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
             {
@@ -112,10 +118,10 @@ namespace Colso.Xrm.AttributeEditor
                 Icon = icon;
             }
 
-            public string Message { get; set; }
-            public string Caption { get; set; }
             public MessageBoxButtons Buttons { get; set; }
+            public string Caption { get; set; }
             public MessageBoxIcon Icon { get; set; }
+            public string Message { get; set; }
         }
     }
 }

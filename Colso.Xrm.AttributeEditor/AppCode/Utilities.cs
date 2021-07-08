@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Colso.Xrm.AttributeEditor.AppCode
 {
     public static class Utilities
     {
-        const int ColumnBase = 26;
-        const int DigitMax = 7; // ceil(log26(Int32.Max))
-        const string Digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const int ColumnBase = 26;
+        private const int DigitMax = 7; // ceil(log26(Int32.Max))
+        private const string Digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
         public static string IndexToColumn(int index)
         {
             if (index <= 0)
